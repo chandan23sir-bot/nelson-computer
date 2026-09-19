@@ -1,0 +1,159 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Admin {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  password  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Branch {
+  id         String    @id @default(cuid())
+  branchName String
+  ownerName  String
+  email      String    @unique
+  password   String
+  address    String?
+  mobile     String?
+  status     String    @default("active")
+  students   Student[]
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+}
+
+model Course {
+  id          String    @id @default(cuid())
+  courseName  String
+  duration    String
+  fees        Float
+  syllabus    String?
+  description String?
+  icon        String?
+  category    String?
+  students    Student[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Student {
+  id            String       @id @default(cuid())
+  branchId      String?
+  branch        Branch?      @relation(fields: [branchId], references: [id])
+  studentName   String
+  fatherName    String
+  mobile        String
+  email         String?
+  courseId      String?
+  course        Course?      @relation(fields: [courseId], references: [id])
+  photo         String?
+  password      String
+  admissionDate DateTime     @default(now())
+  status        String       @default("active")
+  fees          Fee[]
+  attendances   Attendance[]
+  results       Result[]
+  certificates  Certificate[]
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+}
+
+model Fee {
+  id          String   @id @default(cuid())
+  studentId   String
+  student     Student  @relation(fields: [studentId], references: [id])
+  amount      Float
+  paymentDate DateTime @default(now())
+  status      String   @default("pending")
+  receiptNo   String?
+  month       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Attendance {
+  id        String   @id @default(cuid())
+  studentId String
+  student   Student  @relation(fields: [studentId], references: [id])
+  date      DateTime
+  status    String   @default("present")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Exam {
+  id         String   @id @default(cuid())
+  examName   String
+  examDate   DateTime
+  courseId   String?
+  totalMarks Int?
+  results    Result[]
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model Result {
+  id        String   @id @default(cuid())
+  studentId String
+  student   Student  @relation(fields: [studentId], references: [id])
+  examId    String?
+  exam      Exam?    @relation(fields: [examId], references: [id])
+  marks     String
+  grade     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Certificate {
+  id            String   @id @default(cuid())
+  studentId     String
+  student       Student  @relation(fields: [studentId], references: [id])
+  certificateNo String   @unique
+  qrCode        String?
+  issuedDate    DateTime @default(now())
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model AdmissionInquiry {
+  id          String   @id @default(cuid())
+  studentName String
+  fatherName  String
+  mobile      String
+  email       String?
+  course      String
+  message     String?
+  status      String   @default("pending")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Notice {
+  id        String   @id @default(cuid())
+  title     String
+  content   String
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+model OtpCode {
+  id         String   @id @default(cuid())
+  email      String
+  purpose    String
+  codeHash   String
+  payload    String?
+  expiresAt  DateTime
+  attempts   Int      @default(0)
+  createdAt  DateTime @default(now())
+
+  @@index([email, purpose])
+  @@index([expiresAt])
+}
